@@ -1,0 +1,6 @@
+{
+  "name": "CoachingOS",
+  "description": "White-Label Coaching Management System website with full Landing Page, Authentication, Super Admin Dashboard, and Coaching Owner Dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

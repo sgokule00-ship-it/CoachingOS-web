@@ -1,0 +1,75 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account information and role inside the application",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique identifier of the user (Firebase Auth UID)" },
+        "name": { "type": "string", "description": "Display name of the user" },
+        "email": { "type": "string", "format": "email", "description": "Primary email address" },
+        "mobile": { "type": "string", "description": "Contact phone number" },
+        "role": { "type": "string", "enum": ["super_admin", "owner", "teacher", "student", "parent"], "description": "The security and UI role assigned to this user" },
+        "coachingId": { "type": "string", "description": "The unique coaching academy ID, or null for super admins" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "ISO timestamp when the user profile was created" }
+      },
+      "required": ["uid", "name", "email", "role"]
+    },
+    "Coaching": {
+      "title": "Coaching Academy",
+      "description": "Academy setting and white-label branding configurations",
+      "type": "object",
+      "properties": {
+        "coachingId": { "type": "string", "description": "Unique ID of the coaching academy" },
+        "name": { "type": "string", "description": "Name of the coaching academy" },
+        "city": { "type": "string" },
+        "state": { "type": "string" },
+        "ownerId": { "type": "string", "description": "Auth UID of the owner of this academy" },
+        "primaryColor": { "type": "string" },
+        "secondaryColor": { "type": "string" },
+        "websiteTitle": { "type": "string" },
+        "contactDetails": { "type": "string" },
+        "address": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "academicSession": { "type": "string" }
+      },
+      "required": ["coachingId", "name", "ownerId"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "Student roster profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "coachingId": { "type": "string" },
+        "name": { "type": "string" },
+        "rollNo": { "type": "string" },
+        "admissionNo": { "type": "string" },
+        "email": { "type": "string" },
+        "mobile": { "type": "string" },
+        "parentName": { "type": "string" },
+        "parentMobile": { "type": "string" },
+        "batchId": { "type": "string" },
+        "admissionDate": { "type": "string" },
+        "feesDue": { "type": "number" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "coachingId", "name", "batchId"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "#/entities/User",
+      "description": "User profiles"
+    },
+    "/coachings/{coachingId}": {
+      "schema": "#/entities/Coaching",
+      "description": "Coaching white-label details"
+    },
+    "/students/{studentId}": {
+      "schema": "#/entities/Student",
+      "description": "Students list"
+    }
+  }
+}
