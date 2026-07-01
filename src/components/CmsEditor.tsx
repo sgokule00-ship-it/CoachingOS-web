@@ -984,7 +984,7 @@ export const CmsEditor: React.FC = () => {
           <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm">
             <div>
               <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white">Pricing & Subscriptions Panel</h3>
-              <p className="text-xs text-slate-400 mt-1">Configure subscription pricing models, trial plans, period tags, and list features.</p>
+              <p className="text-xs text-slate-400 mt-1">Configure subscription pricing layouts. CoachingOS Pro is the single standardized plan enabled globally.</p>
             </div>
             <hr className="border-slate-100 dark:border-slate-800" />
 
@@ -1009,140 +1009,50 @@ export const CmsEditor: React.FC = () => {
               </div>
             </div>
 
-            {/* Add pricing card */}
-            <div className="border border-indigo-100 dark:border-slate-800 p-5 rounded-2xl bg-indigo-50/20 dark:bg-slate-950/20 space-y-4">
-              <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block">Add Subscription Plan</span>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[9px] font-bold text-slate-500 uppercase">Plan Name</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Pro Studio Plan"
-                    value={newPlan.name}
-                    onChange={(e) => setNewPlan({ ...newPlan, name: e.target.value })}
-                    className="p-2 border border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-900 rounded-lg text-xs"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[9px] font-bold text-slate-500 uppercase">Price Label</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. $79"
-                    value={newPlan.price}
-                    onChange={(e) => setNewPlan({ ...newPlan, price: e.target.value })}
-                    className="p-2 border border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-900 rounded-lg text-xs"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[9px] font-bold text-slate-500 uppercase">Period Label</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. mo"
-                    value={newPlan.period}
-                    onChange={(e) => setNewPlan({ ...newPlan, period: e.target.value })}
-                    className="p-2 border border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-900 rounded-lg text-xs"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[9px] font-bold text-slate-500 uppercase">Featured Badge</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Most Popular"
-                    value={newPlan.badge}
-                    onChange={(e) => setNewPlan({ ...newPlan, badge: e.target.value })}
-                    className="p-2 border border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-900 rounded-lg text-xs"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="flex flex-col gap-1 sm:col-span-2">
-                  <label className="text-[9px] font-bold text-slate-500 uppercase">Brief Plan Description</label>
-                  <input
-                    type="text"
-                    placeholder="Perfect for growing coaching academies"
-                    value={newPlan.description}
-                    onChange={(e) => setNewPlan({ ...newPlan, description: e.target.value })}
-                    className="p-2 border border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-900 rounded-lg text-xs"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[9px] font-bold text-slate-500 uppercase">Popular Standard Border</label>
-                  <select
-                    value={newPlan.isPopular ? "yes" : "no"}
-                    onChange={(e) => setNewPlan({ ...newPlan, isPopular: e.target.value === "yes" })}
-                    className="p-2 border border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-900 rounded-lg text-xs"
-                  >
-                    <option value="no">No (Standard Border)</option>
-                    <option value="yes">Yes (Indigo Border Accent)</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Plan bullet points */}
-              <div className="border border-slate-100 dark:border-slate-800 p-3 rounded-xl bg-white dark:bg-slate-900 space-y-2">
-                <label className="text-[9px] font-bold text-slate-450 uppercase block">Plan Features Bullets</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="e.g. Unlimited Batches & Classrooms"
-                    value={newPlanFeature}
-                    onChange={(e) => setNewPlanFeature(e.target.value)}
-                    className="flex-grow p-2 border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-850 rounded-lg text-xs"
-                  />
-                  <button onClick={handleAddPlanFeature} className="px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 rounded-lg text-xs font-semibold">
-                    Add
-                  </button>
-                </div>
-                {tempPlanFeatures.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pt-2">
-                    {tempPlanFeatures.map((f, i) => (
-                      <span key={i} className="text-[10px] bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-md flex items-center gap-1 font-semibold">
-                        {f}
-                        <button onClick={() => setTempPlanFeatures(tempPlanFeatures.filter((_, idx) => idx !== i))} className="text-rose-500 hover:opacity-85">&times;</button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-end pt-1">
-                <button
-                  onClick={handleAddPricingPlan}
-                  className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs shadow-sm flex items-center gap-1"
-                >
-                  <Plus className="h-4 w-4" /> Add Subscription Plan
-                </button>
-              </div>
+            <div className="bg-blue-50 dark:bg-slate-950 border border-blue-100 dark:border-slate-800 p-4 rounded-xl text-xs text-blue-700 dark:text-blue-350">
+              <p className="font-semibold">CoachingOS Pro Subscription Rule Enforced:</p>
+              <p className="mt-1">
+                To simplify the platform and provide maximum value, CoachingOS has migrated to a single premium standard plan: <strong>CoachingOS Pro (₹999/month with a 30-Day Free Trial)</strong>. Custom plan generation has been locked to maintain consistency across the entire ecosystem.
+              </p>
             </div>
 
             {/* List existing */}
             <div className="space-y-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Existing Subscription Plans ({config.pricing.plans?.length || 0})</span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {config.pricing.plans?.map((plan) => (
-                  <div key={plan.id} className="border border-slate-150 dark:border-slate-800 p-4 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 flex flex-col justify-between gap-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                          {plan.name}
-                          {plan.isPopular && <span className="text-[8px] bg-indigo-600 text-white px-1.5 py-0.5 rounded font-mono uppercase">Popular</span>}
-                        </h4>
-                        <p className="text-[10px] text-slate-400 leading-normal mt-0.5">{plan.description}</p>
-                      </div>
-                      <span className="font-bold text-sm text-slate-900 dark:text-white font-mono">{plan.price}/{plan.period}</span>
-                    </div>
-                    <ul className="space-y-1 text-[10px] text-slate-500 pl-2 list-disc">
-                      {plan.features?.map((f, i) => <li key={i} className="truncate">{f}</li>)}
-                    </ul>
-                    <div className="flex justify-end">
-                      <button onClick={() => handleRemovePricingPlan(plan.id)} className="p-1.5 bg-rose-500/10 text-rose-500 rounded-lg hover:bg-rose-500/20 transition-colors">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Active System Plan</span>
+              <div className="max-w-md border border-indigo-200 dark:border-indigo-800 p-5 rounded-2xl bg-indigo-50/20 dark:bg-indigo-950/20 flex flex-col justify-between gap-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                      CoachingOS Pro
+                      <span className="text-[8px] bg-indigo-600 text-white px-1.5 py-0.5 rounded font-mono uppercase">Enforced</span>
+                    </h4>
+                    <p className="text-[11px] text-slate-400 leading-normal mt-0.5">Everything you need to run your coaching institute at scale</p>
                   </div>
-                ))}
+                  <span className="font-bold text-base text-slate-900 dark:text-white font-mono">₹999/month</span>
+                </div>
+                <div className="text-[11px] text-slate-500 font-semibold">30 Days Free Trial</div>
+                <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] text-slate-500 list-disc pl-4">
+                  <li>Unlimited Students</li>
+                  <li>Unlimited Teachers</li>
+                  <li>Unlimited Parents</li>
+                  <li>Unlimited Batches</li>
+                  <li>Attendance Management</li>
+                  <li>Fee Management</li>
+                  <li>Exam & Result Management</li>
+                  <li>Homework Management</li>
+                  <li>Study Material</li>
+                  <li>Timetable</li>
+                  <li>Notice Board</li>
+                  <li>Reports</li>
+                  <li>White-Label Branding</li>
+                  <li>Android Mobile App</li>
+                  <li>Owner Web Dashboard</li>
+                  <li>Teacher App</li>
+                  <li>Student App</li>
+                  <li>Parent App</li>
+                  <li>Free Updates</li>
+                  <li>Technical Support</li>
+                </ul>
               </div>
             </div>
 
@@ -1153,7 +1063,7 @@ export const CmsEditor: React.FC = () => {
                 className="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md flex items-center gap-1.5 disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
-                Save Pricing Plans
+                Save Pricing Config
               </button>
             </div>
           </div>

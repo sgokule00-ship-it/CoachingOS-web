@@ -20,7 +20,10 @@ import {
   ChevronRight, 
   Menu, 
   X,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Building2,
+  Copy,
+  Check
 } from "lucide-react";
 import { 
   BarChart, 
@@ -55,6 +58,14 @@ export const OwnerDashboard: React.FC = () => {
   const [batchesCount, setBatchesCount] = useState(0);
   const [pendingFees, setPendingFees] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    toast("Institute Code copied to clipboard!", "success");
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // Read coaching metrics in real-time
   useEffect(() => {
@@ -94,6 +105,7 @@ export const OwnerDashboard: React.FC = () => {
   // Sidebar list
   const sidebarItems = [
     { id: "dashboard", label: "Overview Metrics", icon: <LayoutDashboard className="h-5 w-5" /> },
+    { id: "profile", label: "Institute Profile", icon: <Building2 className="h-5 w-5" /> },
     { id: "students", label: "Students Directory", icon: <Users className="h-5 w-5" /> },
     { id: "teachers", label: "Faculty roster", icon: <ShieldAlert className="h-5 w-5" /> },
     { id: "batches", label: "Academic Batches", icon: <Layers className="h-5 w-5" /> },
@@ -242,6 +254,24 @@ export const OwnerDashboard: React.FC = () => {
             </div>
           </div>
 
+          {/* Trial Expired Alert Banner */}
+          {coaching && (coaching.subscription?.status === "expired" || (coaching.subscription?.endsAt && new Date(coaching.subscription.endsAt).getTime() < Date.now() && coaching.subscription?.status !== "active")) && (
+            <div className="bg-gradient-to-r from-red-500 to-amber-600 text-white px-6 py-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg border border-red-400/30">
+              <div className="space-y-1">
+                <h4 className="font-display font-extrabold text-base">Your trial access has expired</h4>
+                <p className="text-xs text-red-50/90 font-medium">
+                  Unlock continuous cloud access, unlimited directories, mobile rosters, and premium white-labeling instantly.
+                </p>
+              </div>
+              <button 
+                onClick={() => setActiveTab("billing")}
+                className="px-5 py-2.5 bg-white text-rose-600 hover:bg-red-50 text-xs font-bold rounded-xl transition-all shadow-md shrink-0 uppercase tracking-wider font-bold"
+              >
+                Upgrade to Pro – ₹999/month
+              </button>
+            </div>
+          )}
+
           {/* TAB 1: OVERVIEW METRICS */}
           {activeTab === "dashboard" && (
             loading ? (
@@ -343,15 +373,46 @@ export const OwnerDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="glass-card p-6 rounded-3xl flex flex-col justify-between">
-                    <div className="space-y-4">
-                      <h3 className="font-display font-bold text-base text-slate-900 dark:text-white">Active Notifications</h3>
-                      <p className="text-xs text-slate-400 font-medium leading-normal">Important messages or alerts concerning your White-Label SaaS tenancy.</p>
-                      
-                      <div className="p-4 bg-white/10 dark:bg-white/5 border border-white/10 rounded-2xl text-xs font-semibold space-y-1">
-                        <span className="text-[10px] uppercase text-indigo-500 font-bold block">Notice bulletin</span>
-                        <strong className="text-slate-800 dark:text-slate-200 block">JEE Main Prep exams started</strong>
-                        <p className="text-slate-500 font-medium">Coordinate timings and syllabi through the Academic Batches portal.</p>
+                  <div className="space-y-6 flex flex-col justify-between">
+                    <div className="glass-card p-6 rounded-3xl border border-white/20 dark:border-white/5 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm">
+                      <div className="space-y-4">
+                        <h3 className="font-display font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                          <Building2 className="h-5 w-5 text-indigo-500" /> Institute Mobile Code
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-normal">
+                          Students & Teachers enter this unique code in the CoachingOS Android application to load your custom portal and branding.
+                        </p>
+                        
+                        <div className="p-4 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] uppercase text-indigo-500 dark:text-indigo-400 font-bold block">Access Code</span>
+                            <strong className="font-mono text-lg text-slate-900 dark:text-white tracking-widest">{coaching?.instituteCode || "NOT FOUND"}</strong>
+                          </div>
+                          <button
+                            onClick={() => coaching?.instituteCode && handleCopyCode(coaching.instituteCode)}
+                            className="p-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 rounded-xl border border-slate-200 dark:border-slate-700 transition-all shadow-sm text-slate-600 dark:text-slate-300 active:scale-95 flex items-center justify-center cursor-pointer"
+                            title="Copy Code"
+                          >
+                            {copied ? (
+                              <Check className="h-4 w-4 text-emerald-500" />
+                            ) : (
+                              <Copy className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="glass-card p-6 rounded-3xl border border-white/20 dark:border-white/5 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm">
+                      <div className="space-y-4">
+                        <h3 className="font-display font-bold text-base text-slate-900 dark:text-white">Active Notifications</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-450 font-medium leading-normal">Important messages or alerts concerning your White-Label SaaS tenancy.</p>
+                        
+                        <div className="p-4 bg-white/10 dark:bg-white/5 border border-white/10 rounded-2xl text-xs font-semibold space-y-1">
+                          <span className="text-[10px] uppercase text-indigo-500 font-bold block">Notice bulletin</span>
+                          <strong className="text-slate-800 dark:text-slate-200 block">JEE Main Prep exams started</strong>
+                          <p className="text-slate-500 font-medium">Coordinate timings and syllabi through the Academic Batches portal.</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -360,6 +421,100 @@ export const OwnerDashboard: React.FC = () => {
 
               </div>
             )
+          )}
+
+          {/* TAB: INSTITUTE PROFILE */}
+          {activeTab === "profile" && coaching && (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl shadow-sm p-6 sm:p-8 max-w-3xl animate-fade-in space-y-6">
+              <div className="border-b border-slate-100 dark:border-slate-800 pb-5">
+                <h3 className="font-display font-extrabold text-xl text-slate-900 dark:text-white">Institute Profile Card</h3>
+                <p className="text-xs text-slate-400 mt-1">Configure and view registered legal entity profiles and active system credentials.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* Left block - text details */}
+                <div className="space-y-4">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Coaching Name</span>
+                    <strong className="text-slate-800 dark:text-slate-200 text-base block">{coaching.name}</strong>
+                  </div>
+                  
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Academic Session</span>
+                    <span className="text-slate-600 dark:text-slate-350 text-sm block font-semibold">{coaching.academicSession}</span>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Registered Address</span>
+                    <span className="text-slate-600 dark:text-slate-350 text-sm block font-medium">{coaching.address || `${coaching.city}, ${coaching.state}`}</span>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Registration Date</span>
+                    <span className="text-slate-600 dark:text-slate-350 text-sm block font-mono font-medium">
+                      {coaching.createdAt ? new Date(coaching.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : "N/A"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right block - access code & subscription status */}
+                <div className="space-y-4 p-5 bg-slate-50 dark:bg-slate-850 rounded-2xl border border-slate-150 dark:border-slate-800">
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Institute Code (Read-Only)</span>
+                      <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-750 text-slate-600 dark:text-slate-300 font-sans">Locked</span>
+                    </div>
+                    
+                    <div className="flex gap-2 items-center mt-2">
+                      <div className="bg-white dark:bg-slate-900 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80 font-mono font-bold text-slate-900 dark:text-white tracking-widest text-lg flex-grow shadow-inner">
+                        {coaching.instituteCode || "NOT LOADED"}
+                      </div>
+                      <button
+                        onClick={() => coaching.instituteCode && handleCopyCode(coaching.instituteCode)}
+                        className="p-3 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-700 transition-all shadow-sm text-slate-600 dark:text-slate-300 active:scale-95 flex items-center justify-center cursor-pointer"
+                        title="Copy Code"
+                      >
+                        {copied ? (
+                          <Check className="h-4 w-4 text-emerald-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-slate-400 font-medium mt-1">This code is read-only for tenant security. Contact support or super-admin to modify it.</p>
+                  </div>
+
+                  <div className="border-t border-slate-200/50 dark:border-slate-700/50 pt-4 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-semibold text-slate-500">Subscription Status</span>
+                      <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold uppercase ${
+                        coaching.subscription?.status === "active" 
+                          ? "bg-emerald-500/10 text-emerald-500"
+                          : coaching.subscription?.status === "trial"
+                          ? "bg-blue-500/10 text-blue-500"
+                          : "bg-rose-500/10 text-rose-500"
+                      }`}>
+                        {coaching.subscription?.status || "trial"}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-semibold text-slate-500">Subscription Plan</span>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{coaching.subscription?.plan || "Trial Plan"}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-semibold text-slate-500">Ends At</span>
+                      <span className="text-xs font-bold font-mono text-slate-400">
+                        {coaching.subscription?.endsAt ? new Date(coaching.subscription.endsAt).toLocaleDateString() : "N/A"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
           )}
 
           {/* TAB 2: STUDENTS DIRECTORY */}

@@ -23,50 +23,36 @@ interface BillingModuleProps {
 
 const PLANS = [
   {
-    id: "starter_monthly",
-    name: "Starter Studio Plan",
-    price: 799,
+    id: "coachingos_pro",
+    name: "CoachingOS Pro",
+    price: 999,
     currency: "INR",
     period: "month",
-    description: "Ideal for growing individual studios starting up.",
+    description: "Everything you need to run your coaching institute at scale.",
+    badge: "Recommended",
     features: [
-      "Up to 50 active students",
-      "Academic batch planner",
-      "Simple attendance ledger",
-      "Email support within 24 hours"
-    ]
-  },
-  {
-    id: "growth_monthly",
-    name: "Growth Scale Plan",
-    price: 2499,
-    currency: "INR",
-    period: "month",
-    description: "Perfect for multi-batch institutes with faculty rosters.",
-    features: [
-      "Unlimited active students",
-      "Full faculty roster & permissions",
-      "Automated attendance logs",
-      "Tuition fee tracker",
-      "Priority priority support"
+      "Unlimited Students",
+      "Unlimited Teachers",
+      "Unlimited Parents",
+      "Unlimited Batches",
+      "Attendance Management",
+      "Fee Management",
+      "Exam & Result Management",
+      "Homework Management",
+      "Study Material",
+      "Timetable",
+      "Notice Board",
+      "Reports",
+      "White-Label Branding",
+      "Android Mobile App",
+      "Owner Web Dashboard",
+      "Teacher App",
+      "Student App",
+      "Parent App",
+      "Free Updates",
+      "Technical Support"
     ],
     isPopular: true
-  },
-  {
-    id: "pro_annual",
-    name: "Pro Studio Annual",
-    price: 19999,
-    currency: "INR",
-    period: "year",
-    description: "Best value for full white-label brand ownership.",
-    features: [
-      "Full White-Label portal setup",
-      "Custom brand colors & secondary menus",
-      "Unlimited batch rosters & tutors",
-      "Advanced revenue analytics reports",
-      "Dedicated account manager support"
-    ],
-    badge: "Best Value"
   }
 ];
 
@@ -204,7 +190,7 @@ export const BillingModule: React.FC<BillingModuleProps> = ({ coaching, userProf
             amount: Number(plan.price),
             currency: plan.currency || "INR",
             planId: plan.id,
-            planName: plan.name || "Starter",
+            planName: plan.name || "CoachingOS Pro",
             status: "pending",
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -330,7 +316,7 @@ export const BillingModule: React.FC<BillingModuleProps> = ({ coaching, userProf
 
         await updateDoc(coachingRef, {
           "subscription.status": "active",
-          "subscription.plan": activeSimOrder.planName || "Starter",
+          "subscription.plan": activeSimOrder.planName || "CoachingOS Pro",
           "subscription.endsAt": endsAt.toISOString()
         });
 
@@ -492,7 +478,7 @@ export const BillingModule: React.FC<BillingModuleProps> = ({ coaching, userProf
                     </>
                   ) : (
                     <>
-                      <span>Upgrade Plan</span>
+                      <span>{subStatus === "trial" ? "Start 30-Day Free Trial" : "Upgrade to Pro – ₹999/month"}</span>
                       <ArrowRight className="h-3.5 w-3.5" />
                     </>
                   )}

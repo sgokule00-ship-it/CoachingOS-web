@@ -13,6 +13,7 @@ export interface UserProfile {
 
 export interface Coaching {
   coachingId: string;
+  instituteCode?: string;
   name: string;
   city: string;
   state: string;

@@ -32,7 +32,7 @@ export const Pricing: React.FC = () => {
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch mb-20 max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-center gap-8 items-stretch mb-20 max-w-xl mx-auto">
           {pricing.plans?.map((p) => (
             <div 
               key={p.id} 

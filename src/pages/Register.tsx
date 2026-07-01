@@ -22,6 +22,8 @@ export const Register: React.FC = () => {
   const [seedData, setSeedData] = useState(true); // checked by default
   const [loading, setLoading] = useState(false);
   const [operationNotAllowedError, setOperationNotAllowedError] = useState(false);
+  const [registeredCode, setRegisteredCode] = useState("");
+  const [copiedCode, setCopiedCode] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -52,7 +54,7 @@ export const Register: React.FC = () => {
     setLoading(true);
     try {
       // Register via AuthContext
-      await registerOwner({
+      const newCoaching = await registerOwner({
         coachingName: formData.coachingName,
         ownerName: formData.ownerName,
         mobile: formData.mobile,
@@ -62,32 +64,12 @@ export const Register: React.FC = () => {
         password: formData.password
       }, seedData);
 
-      // Get current logged in user details to seed
-      // Note: registerOwner automatically logs the user in and updates state.
-      // Let's seed data if requested!
-      // We can grab the coaching id and owner uid from local Storage or session or wait for auth state.
-      // But we can extract it from the user profiles collection we just wrote.
-      // Since we just generated the user, we can fetch the user details from firebase auth or doc.
-      // Let's load the newly created state.
-      // Actually, since registerOwner sets state, we can compute the coachingId.
-      // Wait, let's verify if registerOwner returns coachingId or we can get it.
-      // In AuthContext, coachingId is generated like `c_${random}`.
-      // To seed easily, we can find the doc we just created in Firestore or pass a predetermined coachingId.
-      // Wait! In AuthContext, `registerOwner` generates coachingId and writes it.
-      // Let's see: we can query the Firestore 'users' collection to find the coachingId we just created,
-      // or we can generate the coachingId here and pass it to registerOwner!
-      // Wait, let's edit AuthContext later if we need to pass coachingId, or in registerOwner,
-      // we can do the seeding inside the registerOwner flow itself, or here.
-      // Actually, let's check AuthContext: registerOwner is self-contained. Let's see if we can seed inside AuthContext,
-      // or we can pass a seed flag to `registerOwner`.
-      // Wait, we can just seed in the AuthContext! Let's edit `/src/contexts/AuthContext.tsx` to handle seeding natively,
-      // which is incredibly clean, OR we can seed here if we return the coachingId and owner ID from registerOwner,
-      // or just call seeding after registration succeeds by fetching the current authenticated state.
-      // Let's modify registerOwner to accept an optional `shouldSeed` parameter and call `seedCoachingData` right inside!
-      // This is extremely modular and guarantees that seeding is completed before redirection.
-
       toast("Account generated and default settings configured!", "success");
-      navigate("/dashboard");
+      if (newCoaching && newCoaching.instituteCode) {
+        setRegisteredCode(newCoaching.instituteCode);
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error: any) {
       console.error("Registration error:", error);
       if (error.code === "auth/operation-not-allowed" || error.message?.includes("operation-not-allowed")) {
@@ -115,6 +97,67 @@ export const Register: React.FC = () => {
       setLoading(false);
     }
   };
+
+  if (registeredCode) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-6 relative">
+        <div className="absolute top-1/4 left-1/4 w-[350px] h-[350px] bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 shadow-xl rounded-3xl p-8 text-center space-y-6 relative z-10 animate-fade-in">
+          <div className="h-16 w-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto border border-emerald-500/20 shadow-inner">
+            <CheckCircle2 className="h-8 w-8" />
+          </div>
+          
+          <div className="space-y-2">
+            <h1 className="font-display font-extrabold text-2xl text-slate-900 dark:text-white">Registration Complete!</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Your CoachingOS workspace has been successfully created.
+            </p>
+          </div>
+
+          <div className="p-5 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl space-y-3">
+            <span className="text-[10px] uppercase font-bold text-indigo-500 dark:text-indigo-400 tracking-wider block">Your Institute Code</span>
+            
+            <div className="flex gap-2 items-center justify-center">
+              <span className="font-mono font-black text-2xl text-slate-900 dark:text-white tracking-widest bg-white dark:bg-slate-900 border border-slate-250 dark:border-slate-750 px-5 py-2.5 rounded-xl shadow-inner">
+                {registeredCode}
+              </span>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(registeredCode);
+                  setCopiedCode(true);
+                  toast("Institute Code copied to clipboard!", "success");
+                  setTimeout(() => setCopiedCode(false), 2000);
+                }}
+                className="p-3 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-700 transition-all shadow-sm text-slate-600 dark:text-slate-300 active:scale-95 flex items-center justify-center cursor-pointer"
+                title="Copy Code"
+              >
+                {copiedCode ? (
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                ) : (
+                  <Building2 className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="text-left text-xs bg-slate-50 dark:bg-slate-850 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 space-y-1.5 leading-normal">
+            <strong className="text-slate-750 dark:text-slate-300 block">Why is this code important?</strong>
+            <p>1. It identifies your academy inside the white-label mobile application ecosystem.</p>
+            <p>2. Give this code to your students and teachers to let them log in under your branding.</p>
+            <p>3. You can find and copy this code anytime on your dashboard home screen.</p>
+          </div>
+
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <span>Proceed to Dashboard</span>
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-slate-50 dark:bg-slate-950">

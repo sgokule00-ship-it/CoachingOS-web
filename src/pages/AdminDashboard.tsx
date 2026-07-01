@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth, generateInstituteCode } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { db } from "../firebase/config";
 import { BackgroundOrbs } from "../components/BackgroundOrbs";
@@ -143,11 +143,24 @@ export const AdminDashboard: React.FC = () => {
       await updateDoc(coachingRef, {
         "subscription.status": "active",
         "subscription.endsAt": endsAt,
-        "subscription.plan": "Pro Studio Plan"
+        "subscription.plan": "CoachingOS Pro"
       });
       toast("Subscription activated for 30 days!", "success");
     } catch (err) {
       toast("Failed to activate subscription.", "error");
+    }
+  };
+
+  const handleRegenerateCode = async (coachingId: string) => {
+    try {
+      const code = await generateInstituteCode();
+      const coachingRef = doc(db, "coachings", coachingId);
+      await updateDoc(coachingRef, {
+        instituteCode: code
+      });
+      toast(`Institute Code regenerated to: ${code}`, "success");
+    } catch (err) {
+      toast("Failed to regenerate Institute Code.", "error");
     }
   };
 
@@ -226,7 +239,7 @@ export const AdminDashboard: React.FC = () => {
   const activeTrials = coachings.filter((c) => c.subscription?.status === "trial").length;
   const activeSubs = coachings.filter((c) => c.subscription?.status === "active").length;
   const expiredSubs = coachings.filter((c) => c.subscription?.status === "expired").length;
-  const totalRevenue = activeSubs * 79; // Estimate based on Pro plan
+  const totalRevenue = activeSubs * 999; // Estimate based on Pro plan (₹999)
 
   const revenueData = [
     { name: "Jan", revenue: 2400 },
@@ -534,6 +547,7 @@ export const AdminDashboard: React.FC = () => {
                         <th className="py-4 font-bold">Coaching Name</th>
                         <th className="py-4 font-bold">Location</th>
                         <th className="py-4 font-bold">Session</th>
+                        <th className="py-4 font-bold">Institute Code</th>
                         <th className="py-4 font-bold">Subscription</th>
                         <th className="py-4 font-bold">Expiry</th>
                         <th className="py-4 font-bold text-right">Actions</th>
@@ -548,6 +562,7 @@ export const AdminDashboard: React.FC = () => {
                           </td>
                           <td className="py-4 text-slate-600 dark:text-slate-350">{c.city}, {c.state}</td>
                           <td className="py-4 text-slate-600 dark:text-slate-350">{c.academicSession}</td>
+                          <td className="py-4 font-mono font-bold text-slate-800 dark:text-slate-200 tracking-wider text-xs">{c.instituteCode || "N/A"}</td>
                           <td className="py-4">
                             <span className={`text-xs px-2.5 py-1 rounded-full font-semibold uppercase ${
                               c.subscription?.status === "active" 
@@ -564,6 +579,12 @@ export const AdminDashboard: React.FC = () => {
                           </td>
                           <td className="py-4 text-right">
                             <div className="flex gap-2 justify-end">
+                              <button
+                                onClick={() => handleRegenerateCode(c.id)}
+                                className="px-2.5 py-1 text-xs bg-indigo-50 text-indigo-650 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900 rounded border border-indigo-200 font-bold"
+                              >
+                                Regenerate Code
+                              </button>
                               <button
                                 onClick={() => handleExtendTrial(c.id)}
                                 className="px-2.5 py-1 text-xs bg-amber-50 text-amber-600 hover:bg-amber-100 rounded border border-amber-200 font-bold"
@@ -659,17 +680,10 @@ export const AdminDashboard: React.FC = () => {
                     <div className="space-y-4">
                       <div className="p-4 bg-slate-50 dark:bg-slate-850 rounded-xl border border-slate-150 dark:border-slate-850">
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Pro Studio Plan</span>
-                          <span className="text-sm font-extrabold text-blue-500">$79/mo</span>
+                          <span className="text-sm font-bold text-slate-800 dark:text-slate-200">CoachingOS Pro</span>
+                          <span className="text-sm font-extrabold text-blue-500">₹999/month</span>
                         </div>
-                        <span className="text-xs text-slate-400">Includes Whitelabel Logo + Custom hex branding</span>
-                      </div>
-                      <div className="p-4 bg-slate-50 dark:bg-slate-850 rounded-xl border border-slate-150 dark:border-slate-850">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Enterprise Plan</span>
-                          <span className="text-sm font-extrabold text-indigo-500">$199/mo</span>
-                        </div>
-                        <span className="text-xs text-slate-400">Includes Dedicated Custom subdomains</span>
+                        <span className="text-xs text-slate-400">Includes white-label branding, unlimited directories, mobile app access, and multi-user support modules.</span>
                       </div>
                     </div>
                   </div>

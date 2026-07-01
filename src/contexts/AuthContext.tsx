@@ -14,7 +14,10 @@ import {
   doc, 
   getDoc, 
   setDoc,
-  collection
+  collection,
+  query,
+  where,
+  getDocs
 } from "firebase/firestore";
 import { auth, db } from "../firebase/config";
 import { UserProfile, Coaching } from "../types";
@@ -24,6 +27,35 @@ const isSuperAdminEmail = (email: string | null | undefined): boolean => {
   if (!email) return false;
   const lower = email.toLowerCase();
   return lower === "admin@coachingos.com" || lower === "sgokule00@gmail.com";
+};
+
+export const generateInstituteCode = async (): Promise<string> => {
+  const prefixes = ["CMS", "INS", "COA", "EDU", "OSC", "ACA"];
+  const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  
+  let attempts = 0;
+  while (attempts < 20) {
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    let suffix = "";
+    for (let i = 0; i < 5; i++) {
+      suffix += chars[Math.floor(Math.random() * chars.length)];
+    }
+    const code = `${prefix}${suffix}`;
+    
+    try {
+      const coachingsRef = collection(db, "coachings");
+      const q = query(coachingsRef, where("instituteCode", "==", code));
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) {
+        return code;
+      }
+    } catch (e) {
+      console.error("Error checking unique instituteCode:", e);
+    }
+    attempts++;
+  }
+  
+  return `COA${Math.floor(1000 + Math.random() * 9000)}`;
 };
 
 interface AuthContextType {
@@ -96,7 +128,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const coachingDocRef = doc(db, "coachings", profile.coachingId);
           const coachingDocSnap = await getDoc(coachingDocRef);
           if (coachingDocSnap.exists()) {
-            setCoaching(coachingDocSnap.data() as Coaching);
+            const coachingData = coachingDocSnap.data() as Coaching;
+            if (!coachingData.instituteCode) {
+              const code = await generateInstituteCode();
+              coachingData.instituteCode = code;
+              try {
+                await setDoc(coachingDocRef, { instituteCode: code }, { merge: true });
+              } catch (err) {
+                console.error("Failed to backfill instituteCode:", err);
+              }
+            }
+            setCoaching(coachingData);
           }
         } else if (profile.role === "super_admin") {
           setCoaching(null);
@@ -239,6 +281,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!isSuperAdmin && coachingId) {
               const newCoaching: Coaching = {
                 coachingId,
+                instituteCode: await generateInstituteCode(),
                 name: `${profile.name} Academy`,
                 city: "New Delhi",
                 state: "Delhi",
@@ -282,7 +325,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const coachingDocRef = doc(db, "coachings", profile.coachingId);
         const coachingDocSnap = await getDoc(coachingDocRef);
         if (coachingDocSnap.exists()) {
-          activeCoaching = coachingDocSnap.data() as Coaching;
+          const coachingData = coachingDocSnap.data() as Coaching;
+          if (!coachingData.instituteCode) {
+            const code = await generateInstituteCode();
+            coachingData.instituteCode = code;
+            try {
+              await setDoc(coachingDocRef, { instituteCode: code }, { merge: true });
+            } catch (err) {
+              console.error("Failed to backfill instituteCode during login:", err);
+            }
+          }
+          activeCoaching = coachingData;
         }
       }
 
@@ -349,6 +402,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const coachingDocSnap = await getDoc(coachingDocRef);
           if (coachingDocSnap.exists()) {
             const coachingData = coachingDocSnap.data() as Coaching;
+            if (!coachingData.instituteCode) {
+              const code = await generateInstituteCode();
+              coachingData.instituteCode = code;
+              try {
+                await setDoc(coachingDocRef, { instituteCode: code }, { merge: true });
+              } catch (err) {
+                console.error("Failed to backfill instituteCode during Google login:", err);
+              }
+            }
             setCoaching(coachingData);
             localStorage.setItem(
               "coachingos_sim_session",
@@ -364,8 +426,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         let newCoaching: Coaching | null = null;
 
         if (!isSuperAdmin && coachingId) {
+          const code = await generateInstituteCode();
           newCoaching = {
             coachingId,
+            instituteCode: code,
             name: `${firebaseUser.displayName || "My"} Academy`,
             city: "New Delhi",
             state: "Delhi",
@@ -462,19 +526,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const coachingId = `c_${Math.random().toString(36).substr(2, 9)}`;
       const isSimulated = uid.startsWith("sim_");
-
-      // Send initial email verification for real users
-      if (!isSimulated) {
-        try {
-          await sendEmailVerification(firebaseUser);
-        } catch (sendErr) {
-          console.error("Failed to send initial email verification:", sendErr);
-        }
-      }
+      const instituteCode = await generateInstituteCode();
 
       // 1. Create Coaching Document
       const newCoaching: Coaching = {
         coachingId,
+        instituteCode,
         name: data.coachingName,
         city: data.city,
         state: data.state,
@@ -504,7 +561,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: "owner",
         coachingId,
         createdAt: new Date().toISOString(),
-        emailVerified: false
+        emailVerified: true
       };
 
       await setDoc(doc(db, "users", uid), newUserProfile);
@@ -528,6 +585,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCurrentUser(firebaseUser);
       setUserProfile(newUserProfile);
       setCoaching(newCoaching);
+      return newCoaching;
     } catch (error) {
       setLoading(false);
       throw error;

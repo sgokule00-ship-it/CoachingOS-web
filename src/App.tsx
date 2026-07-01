@@ -4,8 +4,6 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { CmsProvider } from "./contexts/CmsContext";
-import { EmailVerificationPending } from "./components/EmailVerificationPending";
-
 // Layout
 import { PublicLayout } from "./components/PublicLayout";
 
@@ -51,11 +49,6 @@ const OwnerRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <Navigate to="/login" replace />
       </div>
     );
-  }
-
-  // Ensure email verification
-  if (!currentUser.emailVerified && !userProfile?.emailVerified) {
-    return <EmailVerificationPending />;
   }
 
   return <>{children}</>;

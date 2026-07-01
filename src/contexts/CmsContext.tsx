@@ -295,63 +295,41 @@ export const defaultCmsConfig: CmsConfig = {
     ]
   },
   pricing: {
-    title: "Transparent, Growth-Friendly Pricing",
-    subtitle: "No setup fees, no hidden percentages. Choose the perfect plan for your coaching institute size. Start free, scale at your own pace.",
+    title: "One Powerful Plan for Everything",
+    subtitle: "Start your 30-day free trial today. No credit card required. Upgrade to CoachingOS Pro for just ₹999/month once your trial ends.",
     plans: [
       {
-        id: "p1",
-        name: "Standard Trial Plan",
-        price: "$0",
-        period: "14 days",
-        description: "Perfect for testing and getting full system hands-on",
-        badge: "Free Trial",
-        isPopular: false,
-        features: [
-          "Up to 15 Registered Students",
-          "Standard Attendance Logging",
-          "Basic Announcements Feed",
-          "Real-time Sync Connection",
-          "14-Day Expiry Timeline"
-        ],
-        ctaText: "Register Trial Account",
-        link: "/register"
-      },
-      {
-        id: "p2",
-        name: "Pro Studio Plan",
-        price: "$79",
-        period: "mo",
-        description: "Perfect for growing coaching academies",
-        badge: "Most Popular",
+        id: "coachingos_pro",
+        name: "CoachingOS Pro",
+        price: "₹999",
+        period: "month",
+        description: "Everything you need to run your coaching institute at scale",
+        badge: "30 Days Free Trial",
         isPopular: true,
         features: [
-          "Unlimited Batches & Classrooms",
-          "Up to 1,000 Active Students",
-          "Full White-Labeling (Logo, Theme Colors)",
-          "Full Attendance & Fees Tracking System",
-          "Android Application Access",
-          "Instant Real-time Sync"
+          "Unlimited Students",
+          "Unlimited Teachers",
+          "Unlimited Parents",
+          "Unlimited Batches",
+          "Attendance Management",
+          "Fee Management",
+          "Exam & Result Management",
+          "Homework Management",
+          "Study Material",
+          "Timetable",
+          "Notice Board",
+          "Reports",
+          "White-Label Branding",
+          "Android Mobile App",
+          "Owner Web Dashboard",
+          "Teacher App",
+          "Student App",
+          "Parent App",
+          "Free Updates",
+          "Technical Support"
         ],
-        ctaText: "Start Free Trial Now",
+        ctaText: "Start 30-Day Free Trial",
         link: "/register"
-      },
-      {
-        id: "p3",
-        name: "Enterprise Core",
-        price: "$199",
-        period: "mo",
-        description: "For large-scale chains with high volume workloads",
-        badge: "Enterprise",
-        isPopular: false,
-        features: [
-          "Unlimited Students & Teachers",
-          "Custom App Store Deployment SLA",
-          "Priority Technical Architecture Support",
-          "Unlimited Daily Announcements",
-          "FCM Push Alerts Infrastructure Integration"
-        ],
-        ctaText: "Speak to our Architects",
-        link: "/contact"
       }
     ]
   },
@@ -469,87 +447,124 @@ export const CmsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Synchronize Website CMS config dynamically in real-time
   useEffect(() => {
     const docRef = doc(db, "website_cms", "config");
-    
-    const unsubscribe = onSnapshot(docRef, (snap) => {
-      if (snap.exists()) {
-        const data = snap.data() as Partial<CmsConfig>;
-        
-        // Deep merge config with defaults so newly added sections don't crash
-        const merged: CmsConfig = {
-          ...defaultCmsConfig,
-          ...data,
-          announcementBar: { ...defaultCmsConfig.announcementBar, ...data.announcementBar },
-          branding: { ...defaultCmsConfig.branding, ...data.branding },
-          bannerSlider: {
-            ...defaultCmsConfig.bannerSlider,
-            ...data.bannerSlider,
-            slides: data.bannerSlider?.slides || defaultCmsConfig.bannerSlider.slides
-          },
-          hero: { ...defaultCmsConfig.hero, ...data.hero },
-          features: {
-            ...defaultCmsConfig.features,
-            ...data.features,
-            highlights: data.features?.highlights || defaultCmsConfig.features.highlights,
-            adminFeatures: data.features?.adminFeatures || defaultCmsConfig.features.adminFeatures,
-            operationalFeatures: data.features?.operationalFeatures || defaultCmsConfig.features.operationalFeatures
-          },
-          about: {
-            ...defaultCmsConfig.about,
-            ...data.about,
-            bulletPoints: data.about?.bulletPoints || defaultCmsConfig.about.bulletPoints
-          },
-          pricing: {
-            ...defaultCmsConfig.pricing,
-            ...data.pricing,
-            plans: data.pricing?.plans || defaultCmsConfig.pricing.plans
-          },
-          testimonials: {
-            ...defaultCmsConfig.testimonials,
-            ...data.testimonials,
-            list: data.testimonials?.list || defaultCmsConfig.testimonials.list
-          },
-          faq: {
-            ...defaultCmsConfig.faq,
-            ...data.faq,
-            list: data.faq?.list || defaultCmsConfig.faq.list
-          },
-          contact: { ...defaultCmsConfig.contact, ...data.contact },
-          socials: { ...defaultCmsConfig.socials, ...data.socials },
-          seo: { ...defaultCmsConfig.seo, ...data.seo },
-          popup: { ...defaultCmsConfig.popup, ...data.popup },
-          footer: {
-            ...defaultCmsConfig.footer,
-            ...data.footer,
-            links: data.footer?.links || defaultCmsConfig.footer.links
-          },
-          settings: { ...defaultCmsConfig.settings, ...data.settings }
-        };
-        
-        setCmsConfig(merged);
-        
-        // Dynamically update document title from branding config
-        if (merged.branding.websiteTitle) {
-          document.title = merged.branding.websiteTitle;
-        }
-        
-        // Dynamic favicon replacement if available
-        if (merged.branding.faviconUrl) {
-          const link: HTMLLinkElement | null = document.querySelector("link[rel*='icon']");
-          if (link) {
-            link.href = merged.branding.faviconUrl;
-          }
-        }
-      } else {
-        // No snapshot on Firebase yet, seed default configuration once or keep loading default
-        setCmsConfig(defaultCmsConfig);
+
+    // Helper to merge data with defaults
+    const mergeConfig = (data: Partial<CmsConfig>): CmsConfig => {
+      return {
+        ...defaultCmsConfig,
+        ...data,
+        announcementBar: { ...defaultCmsConfig.announcementBar, ...data.announcementBar },
+        branding: { ...defaultCmsConfig.branding, ...data.branding },
+        bannerSlider: {
+          ...defaultCmsConfig.bannerSlider,
+          ...data.bannerSlider,
+          slides: data.bannerSlider?.slides || defaultCmsConfig.bannerSlider.slides
+        },
+        hero: { ...defaultCmsConfig.hero, ...data.hero },
+        features: {
+          ...defaultCmsConfig.features,
+          ...data.features,
+          highlights: data.features?.highlights || defaultCmsConfig.features.highlights,
+          adminFeatures: data.features?.adminFeatures || defaultCmsConfig.features.adminFeatures,
+          operationalFeatures: data.features?.operationalFeatures || defaultCmsConfig.features.operationalFeatures
+        },
+        about: {
+          ...defaultCmsConfig.about,
+          ...data.about,
+          bulletPoints: data.about?.bulletPoints || defaultCmsConfig.about.bulletPoints
+        },
+        pricing: {
+          ...defaultCmsConfig.pricing,
+          ...data.pricing,
+          plans: data.pricing?.plans || defaultCmsConfig.pricing.plans
+        },
+        testimonials: {
+          ...defaultCmsConfig.testimonials,
+          ...data.testimonials,
+          list: data.testimonials?.list || defaultCmsConfig.testimonials.list
+        },
+        faq: {
+          ...defaultCmsConfig.faq,
+          ...data.faq,
+          list: data.faq?.list || defaultCmsConfig.faq.list
+        },
+        contact: { ...defaultCmsConfig.contact, ...data.contact },
+        socials: { ...defaultCmsConfig.socials, ...data.socials },
+        seo: { ...defaultCmsConfig.seo, ...data.seo },
+        popup: { ...defaultCmsConfig.popup, ...data.popup },
+        footer: {
+          ...defaultCmsConfig.footer,
+          ...data.footer,
+          links: data.footer?.links || defaultCmsConfig.footer.links
+        },
+        settings: { ...defaultCmsConfig.settings, ...data.settings }
+      };
+    };
+
+    const applyConfig = (config: CmsConfig) => {
+      setCmsConfig(config);
+      if (config.branding.websiteTitle) {
+        document.title = config.branding.websiteTitle;
       }
-      setLoading(false);
-    }, (err) => {
-      console.error("Failed to sync CMS snapshot:", err);
-      setLoading(false);
+      if (config.branding.faviconUrl) {
+        const link: HTMLLinkElement | null = document.querySelector("link[rel*='icon']");
+        if (link) {
+          link.href = config.branding.faviconUrl;
+        }
+      }
+    };
+
+    let unsub: (() => void) | null = null;
+    let loadedInitial = false;
+
+    const loadDirect = async () => {
+      try {
+        const snap = await getDoc(docRef);
+        if (snap.exists()) {
+          const merged = mergeConfig(snap.data() as Partial<CmsConfig>);
+          applyConfig(merged);
+          loadedInitial = true;
+        } else {
+          applyConfig(defaultCmsConfig);
+          loadedInitial = true;
+        }
+      } catch (err) {
+        console.warn("CMS getDoc direct fetch failed, will try onSnapshot or fallback:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Load direct first
+    loadDirect().then(() => {
+      try {
+        unsub = onSnapshot(docRef, (snap) => {
+          if (snap.exists()) {
+            const merged = mergeConfig(snap.data() as Partial<CmsConfig>);
+            applyConfig(merged);
+          } else {
+            applyConfig(defaultCmsConfig);
+          }
+          setLoading(false);
+        }, (err) => {
+          console.warn("CMS onSnapshot listener failed (expected in certain proxy/iframe environments):", err);
+          if (!loadedInitial) {
+            applyConfig(defaultCmsConfig);
+            setLoading(false);
+          }
+        });
+      } catch (err) {
+        console.warn("Failed to initialize CMS onSnapshot:", err);
+        if (!loadedInitial) {
+          applyConfig(defaultCmsConfig);
+          setLoading(false);
+        }
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      if (unsub) unsub();
+    };
   }, []);
 
   const saveCmsConfig = async (newConfig: CmsConfig) => {
