@@ -4,6 +4,7 @@ import { db } from "../../firebase/config";
 import { SupportTicket, Coaching } from "../../types";
 import { useToast } from "../../contexts/ToastContext";
 import { Plus, LifeBuoy, CheckCircle, ChevronRight, MessageSquare, Send } from "lucide-react";
+import { SkeletonPulse } from "../DashboardSkeleton";
 
 interface SupportModuleProps {
   coaching: Coaching;
@@ -177,7 +178,17 @@ export const SupportModule: React.FC<SupportModuleProps> = ({ coaching, ownerId,
         )}
 
         {loading ? (
-          <div className="h-12 bg-slate-100 rounded-xl animate-pulse" />
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="p-3.5 border border-slate-100 dark:border-slate-800 rounded-xl flex flex-col gap-2">
+                <div className="flex justify-between">
+                  <SkeletonPulse className="h-4 w-2/3 rounded" />
+                  <SkeletonPulse className="h-4 w-12 rounded" />
+                </div>
+                <SkeletonPulse className="h-3 w-1/3 rounded" />
+              </div>
+            ))}
+          </div>
         ) : tickets.length === 0 ? (
           <p className="text-xs text-slate-400 py-12 text-center">No active tickets registered. Create one to begin.</p>
         ) : (

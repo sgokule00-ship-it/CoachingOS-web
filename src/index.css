@@ -76,6 +76,55 @@ body {
   box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.15);
 }
 
+/* --- Global Form Input & Element Theme Restructuring --- */
+input, select, textarea {
+  background-color: #ffffff;
+  border-color: #d1d5db;
+  color: #111827 !important; /* Force dark text in light mode */
+  font-family: inherit;
+}
+
+/* Specific placeholder text color */
+input::placeholder, textarea::placeholder {
+  color: #9ca3af !important; /* Light gray placeholder in light mode */
+  opacity: 1 !important;
+}
+
+/* Select option styles to prevent white-on-white dropdowns */
+select option {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* --- Dark Mode Overrides for Form Inputs --- */
+.dark input, 
+.dark select, 
+.dark textarea {
+  background-color: #1f2937;
+  border-color: #374151;
+  color: #ffffff !important; /* Force clean white text in dark mode */
+}
+
+.dark input::placeholder, 
+.dark textarea::placeholder {
+  color: #6b7280 !important; /* Lighter/darker gray placeholder in dark mode */
+  opacity: 1 !important;
+}
+
+/* Select option dark mode styles */
+.dark select option {
+  background-color: #1f2937 !important; /* Dark gray background */
+  color: #ffffff !important; /* White text */
+}
+
+/* Ensure files, dates, and times pickers have correct icon/text colors */
+input[type="date"], input[type="time"] {
+  color-scheme: light;
+}
+.dark input[type="date"], .dark input[type="time"] {
+  color-scheme: dark;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

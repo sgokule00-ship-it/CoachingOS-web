@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCRdsPUhVmSdJ-_EHiUga6kn_yBTA0iLTA",
@@ -14,4 +14,7 @@ const firebaseConfig = {
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app, "ai-studio-coachingos-3266f67a-9b54-4aa9-978d-ca299a162f6f");
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+}, "ai-studio-coachingos-3266f67a-9b54-4aa9-978d-ca299a162f6f");
+

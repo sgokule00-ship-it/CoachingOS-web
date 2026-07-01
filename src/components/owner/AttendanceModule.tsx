@@ -4,6 +4,7 @@ import { db } from "../../firebase/config";
 import { Student, Batch, Attendance } from "../../types";
 import { useToast } from "../../contexts/ToastContext";
 import { Calendar, CheckCircle2, XCircle, Clock, Save, UserCheck } from "lucide-react";
+import { TableSkeleton } from "../DashboardSkeleton";
 
 interface AttendanceModuleProps {
   coachingId: string;
@@ -180,7 +181,9 @@ export const AttendanceModule: React.FC<AttendanceModuleProps> = ({ coachingId }
       </div>
 
       {/* Directory of Students */}
-      {students.length === 0 ? (
+      {loading ? (
+        <TableSkeleton rows={4} cols={3} />
+      ) : students.length === 0 ? (
         <div className="text-center py-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
           <UserCheck className="h-10 w-10 mx-auto text-slate-350 mb-2" />
           <p className="text-sm text-slate-500">Please select a batch with registered students to begin logging.</p>

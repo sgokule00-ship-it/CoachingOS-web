@@ -40,6 +40,8 @@ import { AttendanceModule } from "../components/owner/AttendanceModule";
 import { FeesModule } from "../components/owner/FeesModule";
 import { WhiteLabelModule } from "../components/owner/WhiteLabelModule";
 import { SupportModule } from "../components/owner/SupportModule";
+import { BillingModule } from "../components/owner/BillingModule";
+import { CardSkeletonList, ChartSkeleton, SkeletonPulse } from "../components/DashboardSkeleton";
 
 export const OwnerDashboard: React.FC = () => {
   const { userProfile, coaching, logout } = useAuth();
@@ -98,6 +100,7 @@ export const OwnerDashboard: React.FC = () => {
     { id: "attendance", label: "Attendance Logs", icon: <UserCheck className="h-5 w-5" /> },
     { id: "fees", label: "Tuition Dues", icon: <CreditCard className="h-5 w-5" /> },
     { id: "whitelabel", label: "White Label Setup", icon: <Palette className="h-5 w-5" /> },
+    { id: "billing", label: "Billing & Plans", icon: <DollarSign className="h-5 w-5" /> },
     { id: "support", label: "Support Desk", icon: <LifeBuoy className="h-5 w-5" /> }
   ];
 
@@ -241,95 +244,122 @@ export const OwnerDashboard: React.FC = () => {
 
           {/* TAB 1: OVERVIEW METRICS */}
           {activeTab === "dashboard" && (
-            <div className="space-y-8">
-              
-              {/* Stats card grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                <div className="glass-card p-6 rounded-3xl flex items-center justify-between">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Students</span>
-                    <span className="block font-display font-extrabold text-2xl text-slate-900 dark:text-white">
-                      {loading ? "..." : studentsCount}
-                    </span>
-                  </div>
-                  <div className="p-3 bg-blue-500/10 text-blue-500 rounded-xl border border-blue-500/20">
-                    <Users className="h-5 w-5" />
-                  </div>
-                </div>
+            loading ? (
+              <div className="space-y-8 animate-fade-in">
+                {/* Stats card skeleton grid */}
+                <CardSkeletonList count={4} />
 
-                <div className="glass-card p-6 rounded-3xl flex items-center justify-between">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Faculty Leads</span>
-                    <span className="block font-display font-extrabold text-2xl text-slate-900 dark:text-white">
-                      {loading ? "..." : teachersCount}
-                    </span>
+                {/* Chart & Notification skeleton block */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
+                    <ChartSkeleton />
                   </div>
-                  <div className="p-3 bg-amber-500/10 text-amber-500 rounded-xl border border-amber-500/20">
-                    <ShieldAlert className="h-5 w-5" />
-                  </div>
-                </div>
-
-                <div className="glass-card p-6 rounded-3xl flex items-center justify-between">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Academic Batches</span>
-                    <span className="block font-display font-extrabold text-2xl text-slate-900 dark:text-white">
-                      {loading ? "..." : batchesCount}
-                    </span>
-                  </div>
-                  <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl border border-emerald-500/20">
-                    <Layers className="h-5 w-5" />
-                  </div>
-                </div>
-
-                <div className="glass-card p-6 rounded-3xl flex items-center justify-between">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Outstanding Dues</span>
-                    <span className="block font-display font-extrabold text-2xl text-rose-500">
-                      ${loading ? "..." : pendingFees}
-                    </span>
-                  </div>
-                  <div className="p-3 bg-rose-500/10 text-rose-500 rounded-xl border border-rose-500/20">
-                    <DollarSign className="h-5 w-5" />
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Chart section */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                <div className="lg:col-span-2 glass-card p-6 rounded-3xl">
-                  <h3 className="font-display font-bold text-base text-slate-900 dark:text-white mb-6">Academy Metrics Overview</h3>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.1} />
-                        <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} />
-                        <YAxis stroke="#94a3b8" fontSize={11} />
-                        <Tooltip contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }} />
-                        <Bar dataKey="count" fill={secondaryBrandText} radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                <div className="glass-card p-6 rounded-3xl flex flex-col justify-between">
-                  <div className="space-y-4">
-                    <h3 className="font-display font-bold text-base text-slate-900 dark:text-white">Active Notifications</h3>
-                    <p className="text-xs text-slate-400 font-medium leading-normal">Important messages or alerts concerning your White-Label SaaS tenancy.</p>
-                    
-                    <div className="p-4 bg-white/10 dark:bg-white/5 border border-white/10 rounded-2xl text-xs font-semibold space-y-1">
-                      <span className="text-[10px] uppercase text-indigo-500 font-bold block">Notice bulletin</span>
-                      <strong className="text-slate-800 dark:text-slate-200 block">JEE Main Prep exams started</strong>
-                      <p className="text-slate-500 font-medium">Coordinate timings and syllabi through the Academic Batches portal.</p>
+                  <div className="glass-card p-6 rounded-3xl flex flex-col justify-between space-y-4">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <SkeletonPulse className="h-5 w-1/2 rounded-full" />
+                        <SkeletonPulse className="h-3 w-3/4 rounded-full" />
+                      </div>
+                      <div className="p-5 bg-white/5 dark:bg-white/5 border border-white/10 rounded-2xl space-y-3">
+                        <SkeletonPulse className="h-3.5 w-1/3 rounded-full" />
+                        <SkeletonPulse className="h-4.5 w-2/3 rounded-full" />
+                        <SkeletonPulse className="h-10 w-full rounded-xl" />
+                      </div>
                     </div>
                   </div>
                 </div>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                
+                {/* Stats card grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  
+                  <div className="glass-card p-6 rounded-3xl flex items-center justify-between">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Students</span>
+                      <span className="block font-display font-extrabold text-2xl text-slate-900 dark:text-white">
+                        {studentsCount}
+                      </span>
+                    </div>
+                    <div className="p-3 bg-blue-500/10 text-blue-500 rounded-xl border border-blue-500/20">
+                      <Users className="h-5 w-5" />
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-6 rounded-3xl flex items-center justify-between">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Faculty Leads</span>
+                      <span className="block font-display font-extrabold text-2xl text-slate-900 dark:text-white">
+                        {teachersCount}
+                      </span>
+                    </div>
+                    <div className="p-3 bg-amber-500/10 text-amber-500 rounded-xl border border-amber-500/20">
+                      <ShieldAlert className="h-5 w-5" />
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-6 rounded-3xl flex items-center justify-between">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Academic Batches</span>
+                      <span className="block font-display font-extrabold text-2xl text-slate-900 dark:text-white">
+                        {batchesCount}
+                      </span>
+                    </div>
+                    <div className="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl border border-emerald-500/20">
+                      <Layers className="h-5 w-5" />
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-6 rounded-3xl flex items-center justify-between">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Outstanding Dues</span>
+                      <span className="block font-display font-extrabold text-2xl text-rose-500">
+                        ${pendingFees}
+                      </span>
+                    </div>
+                    <div className="p-3 bg-rose-500/10 text-rose-500 rounded-xl border border-rose-500/20">
+                      <DollarSign className="h-5 w-5" />
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Chart section */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  
+                  <div className="lg:col-span-2 glass-card p-6 rounded-3xl">
+                    <h3 className="font-display font-bold text-base text-slate-900 dark:text-white mb-6">Academy Metrics Overview</h3>
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.1} />
+                          <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} />
+                          <YAxis stroke="#94a3b8" fontSize={11} />
+                          <Tooltip contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }} />
+                          <Bar dataKey="count" fill={secondaryBrandText} radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-6 rounded-3xl flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <h3 className="font-display font-bold text-base text-slate-900 dark:text-white">Active Notifications</h3>
+                      <p className="text-xs text-slate-400 font-medium leading-normal">Important messages or alerts concerning your White-Label SaaS tenancy.</p>
+                      
+                      <div className="p-4 bg-white/10 dark:bg-white/5 border border-white/10 rounded-2xl text-xs font-semibold space-y-1">
+                        <span className="text-[10px] uppercase text-indigo-500 font-bold block">Notice bulletin</span>
+                        <strong className="text-slate-800 dark:text-slate-200 block">JEE Main Prep exams started</strong>
+                        <p className="text-slate-500 font-medium">Coordinate timings and syllabi through the Academic Batches portal.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
 
               </div>
-
-            </div>
+            )
           )}
 
           {/* TAB 2: STUDENTS DIRECTORY */}
@@ -368,6 +398,14 @@ export const OwnerDashboard: React.FC = () => {
               coaching={coaching} 
               ownerId={userProfile.uid} 
               ownerName={userProfile.name} 
+            />
+          )}
+
+          {/* TAB 9: BILLING & PLANS */}
+          {activeTab === "billing" && coaching && userProfile && (
+            <BillingModule 
+              coaching={coaching} 
+              userProfile={userProfile} 
             />
           )}
 

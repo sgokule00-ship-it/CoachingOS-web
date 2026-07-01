@@ -4,6 +4,7 @@ import { db } from "../../firebase/config";
 import { Batch, Teacher } from "../../types";
 import { useToast } from "../../contexts/ToastContext";
 import { Plus, Search, Trash2, Edit2, Layers, Clock, BookOpen, User } from "lucide-react";
+import { GridSkeleton } from "../DashboardSkeleton";
 
 interface BatchesModuleProps {
   coachingId: string;
@@ -18,11 +19,13 @@ export const BatchesModule: React.FC<BatchesModuleProps> = ({ coachingId }) => {
 
   // Form modal state
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     name: "",
     course: "",
     timing: "",
-    teacherId: ""
+    teacherId: "",
+    capacity: 40,
+    subjects: ""
   });
   const [editId, setEditId] = useState<string | null>(null);
 
@@ -73,6 +76,8 @@ export const BatchesModule: React.FC<BatchesModuleProps> = ({ coachingId }) => {
         ...formData,
         id: batchId,
         coachingId,
+        capacity: Number(formData.capacity || 40),
+        subjects: formData.subjects || "",
         status: "active",
         createdAt: new Date().toISOString()
       });
@@ -80,7 +85,7 @@ export const BatchesModule: React.FC<BatchesModuleProps> = ({ coachingId }) => {
       toast(editId ? "Batch updated successfully!" : "Batch created successfully!", "success");
       setShowForm(false);
       setEditId(null);
-      setFormData({ name: "", course: "", timing: "", teacherId: "" });
+      setFormData({ name: "", course: "", timing: "", teacherId: "", capacity: 40, subjects: "" });
     } catch (err) {
       toast("Failed to register batch profile.", "error");
     }
@@ -96,13 +101,15 @@ export const BatchesModule: React.FC<BatchesModuleProps> = ({ coachingId }) => {
     }
   };
 
-  const handleEdit = (b: Batch) => {
+  const handleEdit = (b: any) => {
     setEditId(b.id);
     setFormData({
       name: b.name,
       course: b.course,
       timing: b.timing,
-      teacherId: b.teacherId || ""
+      teacherId: b.teacherId || "",
+      capacity: b.capacity || 40,
+      subjects: b.subjects || ""
     });
     setShowForm(true);
   };
@@ -130,7 +137,7 @@ export const BatchesModule: React.FC<BatchesModuleProps> = ({ coachingId }) => {
         <button
           onClick={() => {
             setEditId(null);
-            setFormData({ name: "", course: "", timing: "", teacherId: teachers[0]?.id || "" });
+            setFormData({ name: "", course: "", timing: "", teacherId: teachers[0]?.id || "", capacity: 40, subjects: "" });
             setShowForm(true);
           }}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold flex items-center gap-1.5 shadow-sm w-full sm:w-auto justify-center"
@@ -144,7 +151,7 @@ export const BatchesModule: React.FC<BatchesModuleProps> = ({ coachingId }) => {
           <h3 className="font-display font-bold text-lg text-slate-950 dark:text-white mb-4">
             {editId ? "Edit Batch Settings" : "Setup New Academic Batch"}
           </h3>
-          <form onSubmit={handleSave} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <form onSubmit={handleSave} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-slate-500">Batch Display Name</label>
@@ -196,11 +203,32 @@ export const BatchesModule: React.FC<BatchesModuleProps> = ({ coachingId }) => {
               </select>
             </div>
 
-            <div className="sm:col-span-2 lg:col-span-4 flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-slate-500">Maximum Capacity (Students)</label>
+              <input
+                type="number"
+                value={formData.capacity}
+                onChange={(e) => setFormData({ ...formData, capacity: Number(e.target.value) })}
+                className="p-2.5 border border-slate-200 dark:border-slate-850 rounded-xl bg-slate-50 dark:bg-slate-850 text-sm focus:outline-none"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-slate-500">Syllabus Subjects Covered</label>
+              <input
+                type="text"
+                value={formData.subjects}
+                onChange={(e) => setFormData({ ...formData, subjects: e.target.value })}
+                placeholder="e.g. Algebra, Calculus, Mechanics"
+                className="p-2.5 border border-slate-200 dark:border-slate-850 rounded-xl bg-slate-50 dark:bg-slate-850 text-sm focus:outline-none"
+              />
+            </div>
+
+            <div className="sm:col-span-2 lg:col-span-3 flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="px-4 py-2 border border-slate-200 dark:border-slate-770 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300"
+                className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300"
               >
                 Cancel
               </button>
@@ -217,7 +245,7 @@ export const BatchesModule: React.FC<BatchesModuleProps> = ({ coachingId }) => {
       )}
 
       {loading ? (
-        <div className="h-28 bg-slate-100 dark:bg-slate-900 rounded-2xl animate-pulse" />
+        <GridSkeleton count={3} />
       ) : filtered.length === 0 ? (
         <div className="text-center py-12 text-slate-400">
           <Layers className="h-10 w-10 mx-auto text-slate-300 mb-2" />
@@ -253,6 +281,23 @@ export const BatchesModule: React.FC<BatchesModuleProps> = ({ coachingId }) => {
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-slate-400" />
                       <span>Faculty Lead: {matchedTeacher?.name || "Dr. Verma"}</span>
+                    </div>
+                    {b.subjects && (
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-slate-400" />
+                        <span className="truncate">Syllabus: {b.subjects}</span>
+                      </div>
+                    )}
+                    
+                    {/* Capacity Progress Bar */}
+                    <div className="pt-2">
+                      <div className="flex justify-between items-center text-[10px] text-slate-450 mb-1">
+                        <span>Seat Capacity</span>
+                        <strong>65% Full (26 / {b.capacity || 40})</strong>
+                      </div>
+                      <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-indigo-600 h-full rounded-full" style={{ width: "65%" }} />
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -8,6 +8,7 @@ export interface UserProfile {
   role: UserRole;
   coachingId: string | null; // null for super_admin
   createdAt: string;
+  emailVerified?: boolean;
 }
 
 export interface Coaching {

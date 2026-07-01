@@ -7,7 +7,8 @@ import {
   User as FirebaseUser,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  sendEmailVerification
 } from "firebase/auth";
 import { 
   doc, 
@@ -46,6 +47,9 @@ interface AuthContextType {
   updateCoachingTheme: (colors: { primaryColor: string; secondaryColor: string; name: string }) => Promise<void>;
   setCoachingState: (coaching: Coaching | null) => void;
   setUserProfileState: (profile: UserProfile | null) => void;
+  sendVerificationEmail: () => Promise<void>;
+  checkVerificationStatus: () => Promise<boolean>;
+  verifySimulatedEmail: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -65,6 +69,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (userDocSnap.exists()) {
         let profile = userDocSnap.data() as UserProfile;
+
+        // Sync emailVerified with real Firebase user if available
+        if (!firebaseUser.uid.startsWith("sim_") && profile.emailVerified !== firebaseUser.emailVerified) {
+          profile = {
+            ...profile,
+            emailVerified: firebaseUser.emailVerified
+          };
+          await setDoc(userDocRef, { emailVerified: firebaseUser.emailVerified }, { merge: true });
+        }
 
         // Force super_admin role for specified emails
         if (isSuperAdmin && profile.role !== "super_admin") {
@@ -448,6 +461,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const coachingId = `c_${Math.random().toString(36).substr(2, 9)}`;
+      const isSimulated = uid.startsWith("sim_");
+
+      // Send initial email verification for real users
+      if (!isSimulated) {
+        try {
+          await sendEmailVerification(firebaseUser);
+        } catch (sendErr) {
+          console.error("Failed to send initial email verification:", sendErr);
+        }
+      }
 
       // 1. Create Coaching Document
       const newCoaching: Coaching = {
@@ -480,7 +503,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         mobile: data.mobile,
         role: "owner",
         coachingId,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        emailVerified: false
       };
 
       await setDoc(doc(db, "users", uid), newUserProfile);
@@ -545,6 +569,84 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const sendVerificationEmail = async () => {
+    if (!currentUser) throw new Error("No user is currently logged in.");
+    if (currentUser.uid.startsWith("sim_")) {
+      console.log("Simulation: Email verification request dispatched to", currentUser.email);
+      return;
+    }
+    await sendEmailVerification(currentUser);
+  };
+
+  const checkVerificationStatus = async (): Promise<boolean> => {
+    if (!currentUser) return false;
+
+    if (currentUser.uid.startsWith("sim_")) {
+      const userDocRef = doc(db, "users", currentUser.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const profile = userDocSnap.data() as UserProfile;
+        if (profile.emailVerified) {
+          setUserProfile(profile);
+          
+          // Update simulated session in localStorage
+          const sim = localStorage.getItem("coachingos_sim_session");
+          if (sim) {
+            try {
+              const parsed = JSON.parse(sim);
+              parsed.profile = profile;
+              localStorage.setItem("coachingos_sim_session", JSON.stringify(parsed));
+            } catch (e) {}
+          }
+          return true;
+        }
+      }
+      return false;
+    }
+
+    await currentUser.reload();
+    const updatedUser = auth.currentUser;
+    if (updatedUser) {
+      setCurrentUser(updatedUser);
+      if (updatedUser.emailVerified && userProfile && !userProfile.emailVerified) {
+        const updatedProfile = { ...userProfile, emailVerified: true };
+        const userDocRef = doc(db, "users", updatedUser.uid);
+        await setDoc(userDocRef, { emailVerified: true }, { merge: true });
+        setUserProfile(updatedProfile);
+        
+        const sim = localStorage.getItem("coachingos_sim_session");
+        if (sim) {
+          try {
+            const parsed = JSON.parse(sim);
+            parsed.profile = updatedProfile;
+            localStorage.setItem("coachingos_sim_session", JSON.stringify(parsed));
+          } catch (e) {}
+        }
+      }
+      return updatedUser.emailVerified;
+    }
+    return false;
+  };
+
+  const verifySimulatedEmail = async (): Promise<void> => {
+    if (!currentUser) return;
+    const userDocRef = doc(db, "users", currentUser.uid);
+    await setDoc(userDocRef, { emailVerified: true }, { merge: true });
+    if (userProfile) {
+      const updatedProfile = { ...userProfile, emailVerified: true };
+      setUserProfile(updatedProfile);
+      
+      const sim = localStorage.getItem("coachingos_sim_session");
+      if (sim) {
+        try {
+          const parsed = JSON.parse(sim);
+          parsed.profile = updatedProfile;
+          localStorage.setItem("coachingos_sim_session", JSON.stringify(parsed));
+        } catch (e) {}
+      }
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       currentUser, 
@@ -558,7 +660,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       resetPassword,
       updateCoachingTheme,
       setCoachingState: setCoaching,
-      setUserProfileState: setUserProfile
+      setUserProfileState: setUserProfile,
+      sendVerificationEmail,
+      checkVerificationStatus,
+      verifySimulatedEmail
     }}>
       {children}
     </AuthContext.Provider>

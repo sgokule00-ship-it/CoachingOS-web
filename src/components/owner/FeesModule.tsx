@@ -4,6 +4,7 @@ import { db } from "../../firebase/config";
 import { Student, FeeInvoice } from "../../types";
 import { useToast } from "../../contexts/ToastContext";
 import { Plus, Search, DollarSign, CheckCircle2, AlertCircle, ShoppingBag } from "lucide-react";
+import { GridSkeleton } from "../DashboardSkeleton";
 
 interface FeesModuleProps {
   coachingId: string;
@@ -222,7 +223,7 @@ export const FeesModule: React.FC<FeesModuleProps> = ({ coachingId }) => {
       )}
 
       {loading ? (
-        <div className="h-28 bg-slate-100 dark:bg-slate-900 rounded-2xl animate-pulse" />
+        <GridSkeleton count={3} />
       ) : filteredInvoices.length === 0 ? (
         <div className="text-center py-12 text-slate-400">
           <ShoppingBag className="h-10 w-10 mx-auto text-slate-300 mb-2" />
