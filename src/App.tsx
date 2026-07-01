@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastProvider } from "./contexts/ToastContext";
+import { CmsProvider } from "./contexts/CmsContext";
 
 // Layout
 import { PublicLayout } from "./components/PublicLayout";
@@ -83,44 +84,46 @@ export default function App() {
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
-          <BrowserRouter>
-            <Routes>
-              
-              {/* Public Website Pages (with Public Header/Footer Layout) */}
-              <Route element={<PublicLayout />}>
-                <Route path="/" element={<Landing />} />
-                <Route path="/features" element={<Features />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-              </Route>
+          <CmsProvider>
+            <BrowserRouter>
+              <Routes>
+                
+                {/* Public Website Pages (with Public Header/Footer Layout) */}
+                <Route element={<PublicLayout />}>
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/features" element={<Features />} />
+                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                </Route>
 
-              {/* Secure Multitenant Dashboards */}
-              <Route 
-                path="/dashboard" 
-                element={
-                  <OwnerRoute>
-                    <OwnerDashboard />
-                  </OwnerRoute>
-                } 
-              />
+                {/* Secure Multitenant Dashboards */}
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <OwnerRoute>
+                      <OwnerDashboard />
+                    </OwnerRoute>
+                  } 
+                />
 
-              <Route 
-                path="/admin" 
-                element={
-                  <AdminRoute>
-                    <AdminDashboard />
-                  </AdminRoute>
-                } 
-              />
+                <Route 
+                  path="/admin" 
+                  element={
+                    <AdminRoute>
+                      <AdminDashboard />
+                    </AdminRoute>
+                  } 
+                />
 
-              {/* Route Fallbacks */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+                {/* Route Fallbacks */}
+                <Route path="*" element={<Navigate to="/" replace />} />
 
-            </Routes>
-          </BrowserRouter>
+              </Routes>
+            </BrowserRouter>
+          </CmsProvider>
         </AuthProvider>
       </ToastProvider>
     </ThemeProvider>

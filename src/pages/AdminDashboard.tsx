@@ -32,8 +32,12 @@ import {
   MessageSquare,
   ChevronRight,
   ShieldAlert,
-  Plus
+  Plus,
+  Globe,
+  Menu,
+  X
 } from "lucide-react";
+import { CmsEditor } from "../components/CmsEditor";
 import { 
   BarChart, 
   Bar, 
@@ -51,6 +55,7 @@ export const AdminDashboard: React.FC = () => {
   const { userProfile, logout } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Admin stats
   const [coachings, setCoachings] = useState<any[]>([]);
@@ -242,18 +247,40 @@ export const AdminDashboard: React.FC = () => {
     { id: "owners", label: "Owners Profile", icon: <Users className="h-5 w-5" /> },
     { id: "revenue", label: "Revenue & Subs", icon: <CreditCard className="h-5 w-5" /> },
     { id: "support", label: "Support Tickets", icon: <LifeBuoy className="h-5 w-5" /> },
+    { id: "websiteCms", label: "Website CMS", icon: <Globe className="h-5 w-5" /> },
     { id: "flags", label: "Feature Flags", icon: <Flag className="h-5 w-5" /> },
     { id: "settings", label: "System Settings", icon: <Settings className="h-5 w-5" /> },
     { id: "broadcast", label: "Global Notices", icon: <Megaphone className="h-5 w-5" /> }
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row relative overflow-hidden">
       {/* Frosted Background Orbs */}
       <BackgroundOrbs />
       
+      {/* Mobile Top Navbar */}
+      <header className="md:hidden flex items-center justify-between p-4 glass-panel border-b border-white/20 dark:border-white/10 relative z-10">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
+            <ShieldAlert className="h-4 w-4" />
+          </div>
+          <span className="font-display font-bold text-slate-800 dark:text-white text-sm">
+            CoachingOS Admin
+          </span>
+        </div>
+        <button 
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 hover:bg-slate-100 rounded-lg dark:hover:bg-slate-800"
+        >
+          {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+      </header>
+
       {/* Sidebar navigation */}
-      <aside className="w-64 glass-panel border-r border-white/20 dark:border-white/10 flex flex-col justify-between p-4 flex-shrink-0 relative z-10">
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-64 glass-panel border-r border-white/20 dark:border-white/10 p-4 flex flex-col justify-between transform transition-transform duration-300 md:relative md:translate-x-0
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+      `}>
         <div className="space-y-6">
           {/* Admin Tag */}
           <div className="flex items-center gap-3 px-2 py-3 border-b border-white/10 dark:border-white/10">
@@ -274,6 +301,7 @@ export const AdminDashboard: React.FC = () => {
                 onClick={() => {
                   setActiveTab(item.id);
                   if (item.id !== "support") setSelectedTicket(null);
+                  setSidebarOpen(false);
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   activeTab === item.id
@@ -299,7 +327,7 @@ export const AdminDashboard: React.FC = () => {
       </aside>
 
       {/* Main Panel */}
-      <main className="flex-grow p-8 overflow-y-auto relative z-10">
+      <main className="flex-grow p-5 sm:p-8 overflow-y-auto relative z-10">
         {loading ? (
           <div className="space-y-6">
             <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded w-1/4 animate-pulse" />
@@ -475,6 +503,11 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
               </div>
+            )}
+
+            {/* TAB CONTENT: WEBSITE CMS */}
+            {activeTab === "websiteCms" && (
+              <CmsEditor />
             )}
 
             {/* TAB CONTENT: 2. COACHINGS LIST */}

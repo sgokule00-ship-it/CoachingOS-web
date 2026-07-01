@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useToast } from "../contexts/ToastContext";
-import { Mail, Phone, MapPin, Send, MessageSquare } from "lucide-react";
+import { useCms } from "../contexts/CmsContext";
+import { Mail, Phone, MapPin, Send, MessageSquare, Clock } from "lucide-react";
 
 export const Contact: React.FC = () => {
   const { toast } = useToast();
+  const { cmsConfig, loading } = useCms();
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
-  const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -13,25 +15,36 @@ export const Contact: React.FC = () => {
       toast("Please complete all form fields.", "error");
       return;
     }
-    setLoading(true);
+    setSubmitLoading(true);
     setTimeout(() => {
       toast("Thank you! Your message has been sent to CoachingOS Support.", "success");
       setFormData({ name: "", email: "", subject: "", message: "" });
-      setLoading(false);
+      setSubmitLoading(false);
     }, 1200);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center space-y-4">
+        <div className="h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm font-semibold text-slate-500">Syncing communication lines...</p>
+      </div>
+    );
+  }
+
+  const { contact } = cmsConfig;
+
   return (
-    <div className="bg-slate-50 dark:bg-slate-950 py-16 md:py-24">
+    <div className="bg-slate-50 dark:bg-slate-950 py-16 md:py-24 text-left">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-slate-900 dark:text-white tracking-tight leading-none mb-6">
-            Get In Touch
+            {contact.title || "Get In Touch"}
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-300">
-            Have questions about white-label migration, custom subdomains, or mobile app integration? Drop our architects a message!
+            {contact.subtitle || "Have questions about white-label migration, custom subdomains, or mobile app integration? Drop our architects a message!"}
           </p>
         </div>
 
@@ -45,48 +58,68 @@ export const Contact: React.FC = () => {
                 <MessageSquare className="h-5 w-5 text-blue-500" /> Support Desk
               </h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                Our core database and whitelabel configuration team is available Mon-Fri, 9:00 AM - 6:00 PM UTC.
+                {contact.description || "Our core database and whitelabel configuration team is available Mon-Fri, 9:00 AM - 6:00 PM UTC."}
               </p>
 
-              <hr className="border-slate-100 dark:border-slate-800" />
+              <hr className="border-slate-100 dark:border-slate-850" />
 
               <div className="space-y-4">
                 
-                <div className="flex gap-4 items-start">
-                  <div className="p-2.5 bg-blue-50 dark:bg-slate-850 rounded-xl text-blue-600 dark:text-blue-400">
-                    <Mail className="h-5 w-5" />
+                {contact.email && (
+                  <div className="flex gap-4 items-start">
+                    <div className="p-2.5 bg-blue-50 dark:bg-slate-850 rounded-xl text-blue-600 dark:text-blue-400">
+                      <Mail className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <span className="block text-xs text-slate-450 font-semibold uppercase">Email</span>
+                      <a href={`mailto:${contact.email}`} className="text-sm font-semibold text-slate-800 dark:text-slate-200 hover:text-blue-600">
+                        {contact.email}
+                      </a>
+                    </div>
                   </div>
-                  <div>
-                    <span className="block text-xs text-slate-450 font-semibold uppercase">Email</span>
-                    <a href="mailto:support@coachingos.com" className="text-sm font-semibold text-slate-800 dark:text-slate-200 hover:text-blue-600">
-                      support@coachingos.com
-                    </a>
-                  </div>
-                </div>
+                )}
 
-                <div className="flex gap-4 items-start">
-                  <div className="p-2.5 bg-blue-50 dark:bg-slate-850 rounded-xl text-blue-600 dark:text-blue-400">
-                    <Phone className="h-5 w-5" />
+                {contact.phone && (
+                  <div className="flex gap-4 items-start">
+                    <div className="p-2.5 bg-blue-50 dark:bg-slate-850 rounded-xl text-blue-600 dark:text-blue-400">
+                      <Phone className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <span className="block text-xs text-slate-450 font-semibold uppercase">Phone</span>
+                      <a href={`tel:${contact.phone}`} className="text-sm font-semibold text-slate-800 dark:text-slate-200 hover:text-blue-600">
+                        {contact.phone}
+                      </a>
+                    </div>
                   </div>
-                  <div>
-                    <span className="block text-xs text-slate-450 font-semibold uppercase">Phone</span>
-                    <a href="tel:+18005550199" className="text-sm font-semibold text-slate-800 dark:text-slate-200 hover:text-blue-600">
-                      +1 (800) 555-0199
-                    </a>
-                  </div>
-                </div>
+                )}
 
-                <div className="flex gap-4 items-start">
-                  <div className="p-2.5 bg-blue-50 dark:bg-slate-850 rounded-xl text-blue-600 dark:text-blue-400">
-                    <MapPin className="h-5 w-5" />
+                {contact.address && (
+                  <div className="flex gap-4 items-start">
+                    <div className="p-2.5 bg-blue-50 dark:bg-slate-850 rounded-xl text-blue-600 dark:text-blue-400">
+                      <MapPin className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <span className="block text-xs text-slate-450 font-semibold uppercase">HQ Address</span>
+                      <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                        {contact.address}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="block text-xs text-slate-450 font-semibold uppercase">HQ Address</span>
-                    <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                      Suite 404, Tech Arcade, Silicon Valley, CA
-                    </span>
+                )}
+
+                {contact.hours && (
+                  <div className="flex gap-4 items-start">
+                    <div className="p-2.5 bg-blue-50 dark:bg-slate-850 rounded-xl text-blue-600 dark:text-blue-400">
+                      <Clock className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <span className="block text-xs text-slate-450 font-semibold uppercase">Working Hours</span>
+                      <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                        {contact.hours}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
 
               </div>
 
@@ -97,8 +130,10 @@ export const Contact: React.FC = () => {
               <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" /> Connection Active
               </span>
-              <span className="text-sm font-bold text-white font-display">CoachingOS Cloud Active</span>
-              <p className="text-xs text-slate-450">
+              <span className="text-sm font-bold text-white font-display">
+                {contact.statusText || "CoachingOS Cloud Active"}
+              </span>
+              <p className="text-xs text-slate-450 leading-relaxed">
                 Your support tickets and administration workspaces are secured via advanced secure cloud systems and modern data isolation.
               </p>
             </div>
@@ -127,7 +162,7 @@ export const Contact: React.FC = () => {
                   <label htmlFor="email" className="text-xs font-semibold text-slate-500 uppercase">Your Email</label>
                   <input
                     id="email"
-                    type="email"
+                    type="type"
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -158,18 +193,23 @@ export const Contact: React.FC = () => {
                   rows={5}
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  placeholder="Tell us about your coaching scale or details..."
+                  placeholder="Type your message here..."
                   className="p-3 border border-slate-200 dark:border-slate-750 bg-slate-50 dark:bg-slate-850 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 />
               </div>
 
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full py-4 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-xl shadow-md disabled:opacity-50 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                disabled={submitLoading}
+                className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {loading ? "Sending..." : "Send Message"}
-                <Send className="h-4 w-4" />
+                {submitLoading ? (
+                  <>Sending Message...</>
+                ) : (
+                  <>
+                    <Send className="h-4.5 w-4.5" /> Send Message
+                  </>
+                )}
               </button>
 
             </form>

@@ -1,70 +1,34 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { 
-  Users, 
-  UserSquare2, 
-  Smartphone, 
-  Clock, 
-  CreditCard, 
-  ClipboardCheck, 
-  Layers, 
-  GraduationCap, 
-  FileText, 
-  BookOpen, 
-  CheckCircle,
-  Megaphone,
-  Palette
-} from "lucide-react";
+import { useCms } from "../contexts/CmsContext";
+import * as Icons from "lucide-react";
 
 export const Features: React.FC = () => {
-  const adminFeatures = [
-    {
-      icon: <Users className="h-6 w-6 text-blue-500" />,
-      title: "Student Directory",
-      description: "Manage detailed student dossiers, roll numbers, guardian contact numbers, linked batch rosters, and tuition statuses."
-    },
-    {
-      icon: <UserSquare2 className="h-6 w-6 text-indigo-500" />,
-      title: "Teacher Coordination",
-      description: "Track teacher profile records, designated subjects, monthly payroll settings, and assigned batches in a single tab."
-    },
-    {
-      icon: <Layers className="h-6 w-6 text-pink-500" />,
-      title: "Batch & Course Allocator",
-      description: "Establish dedicated physical or online batches. Define course syllabus structures and set individual batch timetables."
-    },
-    {
-      icon: <Clock className="h-6 w-6 text-amber-500" />,
-      title: "Interactive Timetables",
-      description: "Generate structured class timesheets. Prevent class conflicts by assigning specific rooms and available teachers."
-    }
-  ];
+  const { cmsConfig, loading } = useCms();
 
-  const operationalFeatures = [
-    {
-      icon: <ClipboardCheck className="h-6 w-6 text-emerald-500" />,
-      title: "Daily Real-time Attendance",
-      description: "Log present, absent, or late states. Sync results with the mobile app so parents are instantly notified on their phones."
-    },
-    {
-      icon: <CreditCard className="h-6 w-6 text-purple-500" />,
-      title: "Tuition Fees ledger",
-      description: "Create billing invoices, track pending tuition fees, record digital or cash payments, and generate downloadable receipts."
-    },
-    {
-      icon: <BookOpen className="h-6 w-6 text-teal-500" />,
-      title: "Homework & Syllabus Tracking",
-      description: "Publish homework assignments with custom descriptions and due dates. Deliver study resources (PDF files, slides) to batches."
-    },
-    {
-      icon: <GraduationCap className="h-6 w-6 text-orange-500" />,
-      title: "Exams & Results Processor",
-      description: "Schedule exams and tests. Enter marks to generate beautiful, mobile-friendly report cards accessible to parents."
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center space-y-4">
+        <div className="h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm font-semibold text-slate-500">Syncing feature matrix...</p>
+      </div>
+    );
+  }
+
+  const { features } = cmsConfig;
+
+  // Dynamic Lucide Icon Resolver
+  const renderIcon = (iconName: string, defaultColorClass = "text-blue-500") => {
+    const IconComponent = (Icons as any)[iconName];
+    if (IconComponent) {
+      return <IconComponent className={`h-6 w-6 ${defaultColorClass}`} />;
     }
-  ];
+    const HelpIcon = Icons.HelpCircle;
+    return <HelpIcon className={`h-6 w-6 ${defaultColorClass}`} />;
+  };
 
   return (
-    <div className="bg-slate-50 dark:bg-slate-950 py-16 md:py-24">
+    <div className="bg-slate-50 dark:bg-slate-950 py-16 md:py-24 text-left">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header section */}
@@ -81,15 +45,17 @@ export const Features: React.FC = () => {
         <div className="mb-20">
           <div className="flex items-center gap-3 mb-10">
             <h2 className="font-display font-bold text-2xl text-slate-900 dark:text-white">
-              Core Academic Directory & Rosters
+              {features.adminTitle || "Core Academic Directory & Rosters"}
             </h2>
             <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {adminFeatures.map((f, i) => (
-              <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-6 shadow-sm flex flex-col gap-4">
-                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl w-fit">{f.icon}</div>
+            {features.adminFeatures?.map((f) => (
+              <div key={f.id} className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-6 shadow-sm flex flex-col gap-4 hover:shadow-md transition-shadow">
+                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl w-fit">
+                  {renderIcon(f.icon, f.icon === "Users" ? "text-blue-500" : f.icon === "UserSquare2" ? "text-indigo-500" : f.icon === "Layers" ? "text-pink-500" : "text-amber-500")}
+                </div>
                 <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white">{f.title}</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{f.description}</p>
               </div>
@@ -101,15 +67,17 @@ export const Features: React.FC = () => {
         <div className="mb-20">
           <div className="flex items-center gap-3 mb-10">
             <h2 className="font-display font-bold text-2xl text-slate-900 dark:text-white">
-              Daily Operations & Real-time Synchronization
+              {features.operationalTitle || "Daily Operations & Real-time Synchronization"}
             </h2>
             <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {operationalFeatures.map((f, i) => (
-              <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-6 shadow-sm flex flex-col gap-4">
-                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl w-fit">{f.icon}</div>
+            {features.operationalFeatures?.map((f) => (
+              <div key={f.id} className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-6 shadow-sm flex flex-col gap-4 hover:shadow-md transition-shadow">
+                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl w-fit">
+                  {renderIcon(f.icon, f.icon === "ClipboardCheck" ? "text-emerald-500" : f.icon === "CreditCard" ? "text-purple-500" : f.icon === "BookOpen" ? "text-teal-500" : "text-orange-500")}
+                </div>
                 <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white">{f.title}</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{f.description}</p>
               </div>
@@ -122,7 +90,7 @@ export const Features: React.FC = () => {
           
           <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-8 shadow-sm flex flex-col md:flex-row gap-6 items-start">
             <div className="p-4 bg-amber-50 dark:bg-amber-950/30 rounded-2xl flex-shrink-0 text-amber-500">
-              <Palette className="h-8 w-8" />
+              <Icons.Palette className="h-8 w-8" />
             </div>
             <div>
               <h3 className="font-display font-bold text-xl text-slate-900 dark:text-white mb-3">
@@ -141,7 +109,7 @@ export const Features: React.FC = () => {
 
           <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-8 shadow-sm flex flex-col md:flex-row gap-6 items-start">
             <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-2xl flex-shrink-0 text-blue-500">
-              <Megaphone className="h-8 w-8" />
+              <Icons.Megaphone className="h-8 w-8" />
             </div>
             <div>
               <h3 className="font-display font-bold text-xl text-slate-900 dark:text-white mb-3">
@@ -159,20 +127,23 @@ export const Features: React.FC = () => {
 
         </div>
 
-        {/* CTA */}
-        <div className="bg-gradient-to-tr from-slate-900 to-slate-800 dark:from-slate-900 dark:to-slate-950 p-8 sm:p-12 rounded-3xl text-center border border-slate-850 flex flex-col items-center">
-          <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-white mb-4">
-            Experience CoachingOS with Demo Data
-          </h2>
-          <p className="text-sm text-slate-300 max-w-xl mb-8">
-            Create an owner trial account, choose your customized whitelabel themes, and trigger our instant seeder tool to start visualizing charts instantly.
-          </p>
-          <Link
-            to="/register"
-            className="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all text-base"
-          >
-            Start Your Free Trial
-          </Link>
+        {/* CTA Banner */}
+        <div className="rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-8 sm:p-12 text-white text-center relative overflow-hidden shadow-lg">
+          <div className="absolute inset-0 bg-grid-white/[0.05] pointer-events-none" />
+          <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center gap-6">
+            <h2 className="font-display font-extrabold text-3xl sm:text-4xl tracking-tight">
+              Ready to claim your branded, white-labeled system?
+            </h2>
+            <p className="text-base text-blue-100 max-w-xl">
+              Register in under 60 seconds, choose your brand hex colors, upload your custom logo, and try out our cloud sync features free for 14 days.
+            </p>
+            <Link
+              to="/register"
+              className="px-8 py-3.5 bg-white text-blue-600 hover:bg-slate-100 font-bold rounded-xl transition-all shadow-md hover:shadow-lg"
+            >
+              Start Free Trial Now
+            </Link>
+          </div>
         </div>
 
       </div>

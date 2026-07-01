@@ -1,8 +1,145 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && getUserData().role == "super_admin";
+    }
+
+    function isCoachingOwner(coachingId) {
+      return isSignedIn() && 
+        getUserData().role == "owner" && 
+        getUserData().coachingId == coachingId;
+    }
+
+    // Default deny catch-all
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
+    }
+
+    // Website CMS Configuration (Read: Public, Write: Super Admin)
+    match /website_cms/{documentId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // Global Notices (Read: Public/Signed in, Write: Super Admin)
+    match /global_notices/{noticeId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // User Profiles
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      // Allow user to write/update their own profile, or Super Admin
+      allow write: if (isSignedIn() && request.auth.uid == uid) || isSuperAdmin();
+    }
+
+    // Coachings / Academies
+    match /coachings/{coachingId} {
+      allow read: if isSignedIn();
+      allow write: if isSuperAdmin() || isCoachingOwner(coachingId);
+    }
+
+    // For all other collections partitioned by coachingId
+    match /students/{studentId} {
+      allow read, write: if isSuperAdmin() || 
+        (isSignedIn() && (
+          (request.resource != null && isCoachingOwner(request.resource.data.coachingId)) ||
+          (resource != null && isCoachingOwner(resource.data.coachingId))
+        ));
+    }
+
+    match /teachers/{teacherId} {
+      allow read, write: if isSuperAdmin() || 
+        (isSignedIn() && (
+          (request.resource != null && isCoachingOwner(request.resource.data.coachingId)) ||
+          (resource != null && isCoachingOwner(resource.data.coachingId))
+        ));
+    }
+
+    match /batches/{batchId} {
+      allow read, write: if isSuperAdmin() || 
+        (isSignedIn() && (
+          (request.resource != null && isCoachingOwner(request.resource.data.coachingId)) ||
+          (resource != null && isCoachingOwner(resource.data.coachingId))
+        ));
+    }
+
+    match /attendance/{attendanceId} {
+      allow read, write: if isSuperAdmin() || 
+        (isSignedIn() && (
+          (request.resource != null && isCoachingOwner(request.resource.data.coachingId)) ||
+          (resource != null && isCoachingOwner(resource.data.coachingId))
+        ));
+    }
+
+    match /fees/{feeId} {
+      allow read, write: if isSuperAdmin() || 
+        (isSignedIn() && (
+          (request.resource != null && isCoachingOwner(request.resource.data.coachingId)) ||
+          (resource != null && isCoachingOwner(resource.data.coachingId))
+        ));
+    }
+
+    match /support_tickets/{ticketId} {
+      allow read, write: if isSuperAdmin() || 
+        (isSignedIn() && (
+          (request.resource != null && isCoachingOwner(request.resource.data.coachingId)) ||
+          (resource != null && isCoachingOwner(resource.data.coachingId))
+        ));
+    }
+
+    match /timetable/{id} {
+      allow read, write: if isSuperAdmin() || (isSignedIn() && (
+        (request.resource != null && isCoachingOwner(request.resource.data.coachingId)) ||
+        (resource != null && isCoachingOwner(resource.data.coachingId))
+      ));
+    }
+
+    match /homework/{id} {
+      allow read, write: if isSuperAdmin() || (isSignedIn() && (
+        (request.resource != null && isCoachingOwner(request.resource.data.coachingId)) ||
+        (resource != null && isCoachingOwner(resource.data.coachingId))
+      ));
+    }
+
+    match /study_material/{id} {
+      allow read, write: if isSuperAdmin() || (isSignedIn() && (
+        (request.resource != null && isCoachingOwner(request.resource.data.coachingId)) ||
+        (resource != null && isCoachingOwner(resource.data.coachingId))
+      ));
+    }
+
+    match /exams/{id} {
+      allow read, write: if isSuperAdmin() || (isSignedIn() && (
+        (request.resource != null && isCoachingOwner(request.resource.data.coachingId)) ||
+        (resource != null && isCoachingOwner(resource.data.coachingId))
+      ));
+    }
+
+    match /results/{id} {
+      allow read, write: if isSuperAdmin() || (isSignedIn() && (
+        (request.resource != null && isCoachingOwner(request.resource.data.coachingId)) ||
+        (resource != null && isCoachingOwner(resource.data.coachingId))
+      ));
+    }
+
+    match /announcements/{id} {
+      allow read, write: if isSuperAdmin() || (isSignedIn() && (
+        (request.resource != null && isCoachingOwner(request.resource.data.coachingId)) ||
+        (resource != null && isCoachingOwner(resource.data.coachingId))
+      ));
     }
   }
 }
